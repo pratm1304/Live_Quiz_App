@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Quiz App</title>
+    <!-- Use a modern, easy-to-read font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Enhanced CSS with modern styling */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 650px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 2.5em;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        h3 {
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        input,
+        button,
+        select {
+            width: 100%;
+            padding: 14px 18px;
+            margin: 10px 0;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            font-size: 16px;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .section-title {
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .option-button {
+            background: #f7fafc;
+            color: #2d3748;
+            border: 2px solid #e2e8f0;
+            font-weight: 500;
+            text-transform: none;
+            letter-spacing: normal;
+            padding: 16px;
+        }
+
+        .option-button:hover:not(:disabled) {
+            background: #edf2f7;
+            border-color: #cbd5e0;
+        }
+
+        .option-button.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .option-button.correct {
+            background: #48bb78;
+            color: white;
+            border-color: #48bb78;
+        }
+
+        .option-button.incorrect {
+            background: #f56565;
+            color: white;
+            border-color: #f56565;
+        }
+
+        #quizCreator label,
+        #quizCreator input,
+        #quizCreator button {
+            display: block;
+            text-align: left;
+        }
+
+        .list-container {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        #leaderboardList,
+        #adminPlayerList,
+        #playerList,
+        #finalLeaderboard {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #leaderboardList li,
+        #finalLeaderboard li {
+            background: linear-gradient(135deg, #f8fafc, #edf2f7);
+            padding: 15px 20px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #adminPlayerList li,
+        #playerList li {
+            background: linear-gradient(135deg, #f8fafc, #edf2f7);
+            padding: 12px 16px;
+            margin-bottom: 6px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .player-name {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .player-score {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .question-box {
+            background: linear-gradient(135deg, #f8fafc, #edf2f7);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .timer-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            transition: width linear;
+            border-radius: 12px;
+        }
+
+        .timer-fill.warning {
+            background: linear-gradient(90deg, #ed8936, #dd6b20);
+        }
+
+        .timer-fill.danger {
+            background: linear-gradient(90deg, #f56565, #e53e3e);
+        }
+
+        #quizStatus {
+            background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 6px solid #48bb78;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.2);
+        }
+
+        #quizStatus p {
+            margin: 8px 0;
+            color: #22543d;
+            font-weight: 500;
+        }
+
+        .room-info {
+            background: linear-gradient(135deg, #e6fffa, #b2f5ea);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 6px solid #38b2ac;
+        }
+
+        .room-info h3 {
+            color: #234e52;
+            margin: 0 0 10px 0;
+        }
+
+        .room-info p {
+            color: #285e61;
+            margin: 5px 0;
+            font-weight: 500;
+        }
+
+        .score-display {
+            background: linear-gradient(135deg, #fef5e7, #fbd38d);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 15px 0;
+            border-left: 6px solid #ed8936;
+        }
+
+        .score-display p {
+            margin: 0;
+            color: #744210;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .feedback-message {
+            padding: 15px;
+            border-radius: 12px;
+            margin: 15px 0;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .feedback-correct {
+            background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
+            color: #22543d;
+            border-left: 6px solid #48bb78;
+        }
+
+        .feedback-incorrect {
+            background: linear-gradient(135deg, #fed7d7, #feb2b2);
+            color: #742a2a;
+            border-left: 6px solid #f56565;
+        }
+
+        .feedback-timeout {
+            background: linear-gradient(135deg, #feebc8, #fbd38d);
+            color: #744210;
+            border-left: 6px solid #ed8936;
+        }
+
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 25px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎯 Live Quiz App</h1>
+
+        <!-- Start Screen -->
+        <div id="startScreen">
+            <button onclick="showAdminView()">🎮 I'm the Admin</button>
+            <button onclick="showPlayerView()">👤 I'm a Player</button>
+        </div>
+
+        <!-- Admin View -->
+        <div id="adminView" class="hidden">
+            <div id="quizCreator">
+                <h2>📝 Create a New Quiz</h2>
+                <input type="text" id="quizTitle" placeholder="Quiz Title" required>
+                <div id="questionsContainer">
+                    <h3 class="section-title">Questions</h3>
+                </div>
+                
+                <button onclick="addQuestion()">➕ Add Question</button>
+                <button onclick="createQuiz()">🚀 Create Quiz</button>
+            </div>
+
+            <div id="adminRoom" class="hidden">
+                <div class="room-info">
+                    <h3>🏠 Quiz Room: <span id="roomCodeDisplay"></span></h3>
+                    <p>📚 Room Name: <span id="quizTitleDisplay"></span></p>
+                </div>
+                
+                <div class="list-container">
+                    <h3 class="section-title">👥 Players in Room: <span id="adminPlayerCount">0</span></h3>
+                    <ul id="adminPlayerList"></ul>
+                </div>
+                
+                <button id="startButton" onclick="startQuiz()">🎯 Start Quiz</button>
+                
+                <div id="quizStatus" class="hidden">
+                    <p><strong>🎮 Quiz is running...</strong></p>
+                    <p>Questions will advance automatically after each timer expires.</p>
+                </div>
+                
+                <!-- Admin Leaderboard - shows during quiz -->
+                <div id="adminLeaderboard" class="hidden">
+                    <div class="list-container">
+                        <h3>🏆 Live Leaderboard</h3>
+                        <ul id="adminLeaderboardList"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Player View -->
+        <div id="playerView" class="hidden">
+            <div id="joinForm">
+                <h2>🎯 Join a Quiz</h2>
+                <input type="text" id="playerName" placeholder="Your Name" required>
+                <input type="text" id="roomCode" placeholder="Room Code" required>
+                <button onclick="joinQuiz()">🚪 Join</button>
+            </div>
+
+            <div id="waitingScreen" class="hidden">
+                <h2>⏳ Waiting for the quiz to start...</h2>
+                <div class="room-info">
+                    <h3>🏠 Room Code: <span id="playerRoomCodeDisplay"></span></h3>
+                    <p>📚 Quiz: <span id="playerQuizTitleDisplay"></span></p>
+                </div>
+                
+                <div class="list-container">
+                    <h3>👥 Players in Room: <span id="playerCount">0</span></h3>
+                    <ul id="playerList"></ul>
+                </div>
+            </div>
+
+            <div id="quizScreen" class="hidden">
+                <div class="question-box">
+                    <div class="timer-bar">
+                        <div id="timerFill" class="timer-fill"></div>
+                    </div>
+                    <p><strong>⏱️ Time Left: <span id="timeLeft">0</span> seconds</strong></p>
+
+                    <h2 id="questionText"></h2>
+                    <div id="optionsContainer" class="options-grid"></div>
+                    
+                    <div id="feedbackMessage" class="hidden"></div>
+                </div>
+                
+                <!-- <div class="score-display">
+                    <p>🎯 Your Score: <span id="playerScore">0</span> points</p>
+                </div> -->
+                
+                <!-- Removed leaderboard from quiz screen - players will only see it at the end -->
+            </div>
+        </div>
+    </div>
+
+    <!-- The Socket.io client library -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Use a secure connection if your server is on HTTPS
+        const socket = io();
+
+        // --- UI State Management ---
+        const startScreen = document.getElementById('startScreen');
+        const adminView = document.getElementById('adminView');
+        const playerView = document.getElementById('playerView');
+        const joinForm = document.getElementById('joinForm');
+        const waitingScreen = document.getElementById('waitingScreen');
+        const quizScreen = document.getElementById('quizScreen');
+
+        // --- Shared variables ---
+        let currentRoomCode = null;
+        let currentQuizTitle = null;
+        let selectedAnswer = null;
+        let currentCorrectAnswer = null;
+
+        function showAdminView() {
+            startScreen.classList.add('hidden');
+            adminView.classList.remove('hidden');
+        }
+
+        function showPlayerView() {
+            startScreen.classList.add('hidden');
+            playerView.classList.remove('hidden');
+        }
+
+        // --- Admin Functions ---
+
+        function addQuestion() {
+            const container = document.getElementById('questionsContainer');
+            const questionIndex = container.children.length - 1; // Subtract 1 for the h3 title
+            const newQuestionDiv = document.createElement('div');
+            newQuestionDiv.innerHTML = `
+                <hr>
+                <input type="text" class="question-text" placeholder="Question ${questionIndex + 1}" required>
+                <input type="text" class="question-option" placeholder="Option A" required>
+                <input type="text" class="question-option" placeholder="Option B" required>
+                <input type="text" class="question-option" placeholder="Option C" required>
+                <input type="text" class="question-option" placeholder="Option D" required>
+                <select class="correct-answer" required>
+                    <option value="">Select Correct Answer</option>
+                    <option value="0">Option A</option>
+                    <option value="1">Option B</option>
+                    <option value="2">Option C</option>
+                    <option value="3">Option D</option>
+                </select>
+                <input type="number" class="time-limit" placeholder="Time Limit (seconds)" required>
+            `;
+            container.appendChild(newQuestionDiv);
+        }
+
+        function createQuiz() {
+            const quizTitle = document.getElementById('quizTitle').value;
+            const questions = [];
+            
+            // Skip the first child which is the h3 title
+            const questionDivs = Array.from(document.getElementById('questionsContainer').children).slice(1);
+            
+            questionDivs.forEach(qDiv => {
+                const options = Array.from(qDiv.querySelectorAll('.question-option')).map(input => input.value);
+                const correctIndex = qDiv.querySelector('.correct-answer').value;
+                const timeLimit = qDiv.querySelector('.time-limit').value;
+
+                if (qDiv.querySelector('.question-text').value && options.every(o => o) && correctIndex !== "" && timeLimit) {
+                    questions.push({
+                        text: qDiv.querySelector('.question-text').value,
+                        options: options,
+                        correctAnswer: options[correctIndex],
+                        timeLimit: parseInt(timeLimit)
+                    });
+                }
+            });
+
+            if (quizTitle && questions.length > 0) {
+                socket.emit('createQuiz', { title: quizTitle, questions: questions });
+            } else {
+                alert('Please fill out all fields for the quiz.');
+            }
+        }
+
+        function startQuiz() {
+            socket.emit('startQuiz', currentRoomCode);
+            document.getElementById('startButton').classList.add('hidden');
+            document.getElementById('quizStatus').classList.remove('hidden');
+            document.getElementById('adminLeaderboard').classList.remove('hidden'); // Show admin leaderboard
+        }
+
+        // --- Player Functions ---
+
+        function joinQuiz() {
+            const playerName = document.getElementById('playerName').value;
+            const roomCode = document.getElementById('roomCode').value;
+
+            if (playerName && roomCode) {
+                socket.emit('joinQuiz', { roomCode, name: playerName });
+            } else {
+                alert('Please enter your name and the room code.');
+            }
+        }
+
+        function submitAnswer(answer) {
+            selectedAnswer = answer;
+            socket.emit('submitAnswer', { roomCode: currentRoomCode, answer });
+            
+            // Visually show which option was selected
+            Array.from(document.getElementById('optionsContainer').children).forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent === answer) {
+                    btn.classList.add('selected');
+                }
+            });
+        }
+
+        function showAnswerFeedback(isCorrect, correctAnswer) {
+            const feedbackDiv = document.getElementById('feedbackMessage');
+            const optionButtons = Array.from(document.getElementById('optionsContainer').children);
+            
+            // Color the buttons based on correct/incorrect
+            optionButtons.forEach(btn => {
+                if (btn.textContent === correctAnswer) {
+                    btn.classList.add('correct');
+                }
+                if (selectedAnswer && btn.textContent === selectedAnswer && btn.textContent !== correctAnswer) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            // Show feedback message
+            feedbackDiv.classList.remove('hidden');
+            if (selectedAnswer === null) {
+                feedbackDiv.className = 'feedback-message feedback-timeout';
+                feedbackDiv.innerHTML = `⏰ Time's up! The correct answer was: <strong>${correctAnswer}</strong>`;
+            } else if (isCorrect) {
+                feedbackDiv.className = 'feedback-message feedback-correct';
+                feedbackDiv.innerHTML = `✅ Correct! Great job!`;
+            } else {
+                feedbackDiv.className = 'feedback-message feedback-incorrect';
+                feedbackDiv.innerHTML = `❌ Incorrect. The correct answer was: <strong>${correctAnswer}</strong>`;
+            }
+        }
+
+        // --- Socket.io Event Listeners ---
+
+        // Admin: Handle quiz creation success
+        socket.on('quizCreated', ({ roomCode }) => {
+            currentRoomCode = roomCode;
+            currentQuizTitle = document.getElementById('quizTitle').value;
+            
+            document.getElementById('quizCreator').classList.add('hidden');
+            document.getElementById('adminRoom').classList.remove('hidden');
+            document.getElementById('roomCodeDisplay').textContent = roomCode;
+            document.getElementById('quizTitleDisplay').textContent = currentQuizTitle;
+        });
+
+        // Admin & Player: Update player list
+        socket.on('playerJoined', (data) => {
+            let players, quizTitle;
+            
+            // Handle both old format (just players array) and new format (object with players and quizTitle)
+            if (Array.isArray(data)) {
+                players = data;
+            } else {
+                players = data.players;
+                quizTitle = data.quizTitle;
+            }
+            
+            // Store quiz title if provided
+            if (quizTitle) {
+                currentQuizTitle = quizTitle;
+            }
+            
+            // Update player view (if visible)
+            const playerList = document.getElementById('playerList');
+            const playerCount = document.getElementById('playerCount');
+            
+            if (playerList && !playerView.classList.contains('hidden')) {
+                playerList.innerHTML = '';
+                players.forEach(player => {
+                    const li = document.createElement('li');
+                    li.textContent = player.name;
+                    playerList.appendChild(li);
+                });
+                
+                if (playerCount) {
+                    playerCount.textContent = players.length;
+                }
+
+                // Update quiz title in player view if we have it
+                const playerQuizTitle = document.getElementById('playerQuizTitleDisplay');
+                if (playerQuizTitle && currentQuizTitle) {
+                    playerQuizTitle.textContent = currentQuizTitle;
+                }
+            }
+            
+            // Update admin view (if visible)
+            const adminPlayerList = document.getElementById('adminPlayerList');
+            const adminPlayerCount = document.getElementById('adminPlayerCount');
+            
+            if (adminPlayerList && !adminView.classList.contains('hidden')) {
+                adminPlayerList.innerHTML = '';
+                players.forEach(player => {
+                    const li = document.createElement('li');
+                    li.textContent = player.name;
+                    adminPlayerList.appendChild(li);
+                });
+                
+                if (adminPlayerCount) {
+                    adminPlayerCount.textContent = players.length;
+                }
+            }
+        });
+
+        // Player: Handle successful room join
+        socket.on('joinedRoom', (data) => {
+            // Handle both old format (just roomCode) and new format (object with roomCode and quizTitle)
+            if (typeof data === 'string') {
+                currentRoomCode = data;
+                document.getElementById('playerRoomCodeDisplay').textContent = data;
+            } else {
+                const { roomCode, quizTitle, players } = data;
+                currentRoomCode = roomCode;
+                currentQuizTitle = quizTitle;
+                
+                document.getElementById('playerRoomCodeDisplay').textContent = roomCode;
+                
+                // Set quiz title immediately
+                const playerQuizTitle = document.getElementById('playerQuizTitleDisplay');
+                if (playerQuizTitle && quizTitle) {
+                    playerQuizTitle.textContent = quizTitle;
+                }
+                
+                // Update player list if provided
+                if (players) {
+                    const playerList = document.getElementById('playerList');
+                    const playerCount = document.getElementById('playerCount');
+                    
+                    if (playerList) {
+                        playerList.innerHTML = '';
+                        players.forEach(player => {
+                            const li = document.createElement('li');
+                            li.textContent = player.name;
+                            playerList.appendChild(li);
+                        });
+                    }
+                    
+                    if (playerCount) {
+                        playerCount.textContent = players.length;
+                    }
+                }
+            }
+            
+            joinForm.classList.add('hidden');
+            waitingScreen.classList.remove('hidden');
+        });
+
+        // Player: Handle join error
+        socket.on('joinError', (message) => {
+            alert(message);
+        });
+
+        // Player: Handle new question
+        socket.on('newQuestion', (question) => {
+            // Reset state for new question
+            selectedAnswer = null;
+            currentCorrectAnswer = question.correctAnswer;
+            
+            waitingScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            document.getElementById('questionText').textContent = question.text;
+
+            // Hide feedback from previous question
+            const feedbackDiv = document.getElementById('feedbackMessage');
+            feedbackDiv.classList.add('hidden');
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-button');
+                button.onclick = () => submitAnswer(option);
+                optionsContainer.appendChild(button);
+            });
+
+            // --- Timer handling ---
+            const timerFill = document.getElementById('timerFill');
+            const timeLeftSpan = document.getElementById('timeLeft');
+            let timeLeft = question.timeLimit;
+
+            timerFill.style.width = "100%";
+            timerFill.className = "timer-fill"; // Reset timer color
+            timeLeftSpan.textContent = timeLeft;
+
+            const interval = setInterval(() => {
+                timeLeft--;
+                timeLeftSpan.textContent = timeLeft;
+                const percentage = (timeLeft / question.timeLimit) * 100;
+                timerFill.style.width = `${percentage}%`;
+
+                // Change timer color based on time remaining
+                if (percentage <= 25) {
+                    timerFill.classList.add('danger');
+                } else if (percentage <= 50) {
+                    timerFill.classList.add('warning');
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    // Disable all buttons when time runs out
+                    Array.from(optionsContainer.children).forEach(btn => btn.disabled = true);
+                    // Note: Answer feedback will be shown when server sends 'questionTimeout' event
+                }
+            }, 1000);
+        });
+
+        // Player: Handle answer result (remove this - we don't want immediate feedback)
+        // socket.on('answerResult', (data) => {
+        //     const { isCorrect, correctAnswer } = data;
+        //     setTimeout(() => {
+        //         showAnswerFeedback(isCorrect, correctAnswer);
+        //     }, 500);
+        // });
+
+        // Player: Handle question timeout (when timer expires)
+        socket.on('questionTimeout', (data) => {
+            const { correctAnswer, results } = data;
+            
+            // Show answer feedback for 2 seconds
+            setTimeout(() => {
+                showAnswerFeedback(selectedAnswer === correctAnswer, correctAnswer);
+                
+                // Hide feedback after 2 seconds and wait for next question
+                setTimeout(() => {
+                    const feedbackDiv = document.getElementById('feedbackMessage');
+                    feedbackDiv.classList.add('hidden');
+                }, 2000);
+            }, 500);
+        });
+
+        // Player & Admin: Update leaderboard
+        socket.on('updateLeaderboard', (leaderboard) => {
+            // Only update admin leaderboard during quiz
+            const adminLeaderboardList = document.getElementById('adminLeaderboardList');
+            if (adminLeaderboardList && !adminView.classList.contains('hidden')) {
+                adminLeaderboardList.innerHTML = ''; // Clear previous list
+                leaderboard.forEach((player, index) => {
+                    const li = document.createElement('li');
+                    const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                    li.innerHTML = `
+                        <span class="player-name">${medal} ${index + 1}. ${player.name}</span>
+                        <span class="player-score">${player.score} pts</span>
+                    `;
+                    adminLeaderboardList.appendChild(li);
+                });
+            }
+
+            // Update local player's score display (for players)
+            const playerNameInput = document.getElementById('playerName');
+            if (playerNameInput && !playerView.classList.contains('hidden')) {
+                const myPlayer = leaderboard.find(p => p.name === playerNameInput.value);
+                if (myPlayer) {
+                    const playerScoreElement = document.getElementById('playerScore');
+                    if (playerScoreElement) {
+                        playerScoreElement.textContent = myPlayer.score;
+                    }
+                }
+            }
+        });
+
+        // Player: Handle quiz end
+        socket.on('quizFinished', (finalLeaderboard) => {
+            quizScreen.classList.add('hidden');
+
+            const container = document.querySelector('.container');
+            container.innerHTML = `
+                <h1>🎯 Live Quiz App</h1>
+                <h2>🏆 Final Results</h2>
+                <div class="list-container">
+                    <ul id="finalLeaderboard"></ul>
+                </div>
+                <button onclick="location.reload()">🔄 Play Again</button>
+            `;
+
+            const leaderboardList = document.getElementById('finalLeaderboard');
+            finalLeaderboard.forEach((player, index) => {
+                const li = document.createElement('li');
+                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                li.innerHTML = `
+                    <span class="player-name">${medal} ${index + 1}. ${player.name}</span>
+                    <span class="player-score">${player.score} pts</span>
+                `;
+                leaderboardList.appendChild(li);
+            });
+        });
+
+        // Initial question for the admin view
+        addQuestion();
+    </script>
+</body>
+
+</html>
